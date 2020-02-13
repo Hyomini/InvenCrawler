@@ -2,11 +2,12 @@ import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "invenCrawler.settings")
 import django
 django.setup()
-from parsed_data.models import LinkData
+from parsed_data.models import Link
+from parsed_data.models import Cmt
 
 if __name__ == "__main__":
-    tmp = LinkData.objects.all()
-    link_list = []
+    tmp = Cmt.objects.filter(nickname__nickname_text__exact='Gnar')
+    comment_list = []
     for t in tmp:
-        link_list.append(t.link)
-    print(link_list)
+        comment_list.append(t.comment)
+    print(comment_list)

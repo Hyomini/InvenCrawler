@@ -5,14 +5,21 @@ import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "invenCrawler.settings")
 import django
 django.setup()
-from parsed_data.models import LinkData
-from parsed_data.models import CmtData
+from parsed_data.models import Link
+from parsed_data.models import Cmt
+from parsed_data.models import Member
 
 cmt_dict = {}
 
 
 def page_parser(url):
-    driver = webdriver.Chrome("C:\chromedriver.exe")
+    options = webdriver.ChromeOptions()
+    options.add_argument('--ignore-certificate-errors')
+    options.add_argument('--ignore-ssl-errors')
+    options.add_argument('headless')
+    options.add_argument('--disable-gpu')
+    options.add_argument("lang=ko_KR")
+    driver = webdriver.Chrome("C:\chromedriver.exe", options=options)
     driver.get(url)
     parser = BeautifulSoup(driver.page_source, "html.parser")
     return parser, driver
@@ -22,12 +29,15 @@ def cmtToNick(url):
     parser, driver = page_parser(url)
     n = parser.find_all('span', class_="nickname")
     c = parser.find_all('span', class_="content cmtContentOne")
+    d = parser.find_all('span', class_="date")
     for i in range(len(n)):
         tmp = c[i].text.replace('\\xa0', ' ')
+        c_tmp = d[i].text.replace('(', '')
+        c_tmp = c_tmp.replace(')', '')
         if n[i].text not in cmt_dict:
-            cmt_dict[n[i].text] = [tmp]
+            cmt_dict[n[i].text] = [(tmp, c_tmp, url)]
         else:
-            cmt_dict[n[i].text] = cmt_dict.get(n[i].text, []) + [tmp]
+            cmt_dict[n[i].text] = cmt_dict.get(n[i].text, []) + [(tmp, c_tmp, url)]
     driver.close()
 
 
@@ -41,8 +51,8 @@ def get_href(url):
     driver.close()
     return boardList
 
-def getLinkData():
-    tmp = LinkData.objects.all()
+def getLink():
+    tmp = Link.objects.all()
     link_list = []
     for t in tmp:
         link_list.append(t.link)
@@ -53,7 +63,7 @@ if __name__ == "__main__":
     existing_links = []
 
     # DB에 저장되어 있는 게시물 링크 가져오기
-    existing_links = getLinkData()
+    existing_links = getLink()
 
 
     # 인벤 LoL/e스포츠 게시판으로부터 게시물들의 href링크 가져오기
@@ -79,12 +89,18 @@ if __name__ == "__main__":
     print(cmt_dict)
     for t, l in board_list.items():
         try:
-            LinkData(title=t, link=l).save()
+            Link(title=t, link=l).save()
         except:
             print("중복된 데이터입니다.")
 
-    for n, c in cmt_dict.items():
-        CmtData(nickname=n, comment=c).save()
+    for n, c_list in cmt_dict.items():
+        tmp_member = Member(nickname_text = n)
+        try:
+            tmp_member.save()
+        except:
+            print("중복된 id입니다.")
+        for c in c_list:
+            Cmt(nickname=tmp_member, comment=c[0], date=c[1], link=c[2]).save()
 
     print(f"게시물(개수:{len(boards)}) 및 댓글 업데이트가 완료되었습니다!")
 

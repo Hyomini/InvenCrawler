@@ -1,0 +1,13 @@
+{% extends "base_generic.html" %}
+{% block title %}Inven Crawler{% endblock %}
+{% block content %}
+  <h1>Lol Inven Crawler Home</h1>
+  <p>Welcome to Lol Inven Crawler, a website developed by <em>Hyomin</em>!</p>
+  <h2>Dynamic content</h2>
+  <p>The Crawler has the following record counts:</p>
+  <ul>
+    <li><strong>Comments:</strong> {{ num_cmts }}</li>
+    <li><strong>Members:</strong> {{ num_members }}</li>
+    <li><strong>Links:</strong> {{ num_links }}</li>
+  </ul>
+{% endblock %}

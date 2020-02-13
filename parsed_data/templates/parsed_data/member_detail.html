@@ -1,0 +1,18 @@
+﻿{% extends "base_generic.html" %}
+
+{% block content %}
+
+  <h2>인벤닉:   <font color="#289AFF">{{ member.nickname_text }}</font></h2>
+ <hr>
+  <div style="margin-left:20px;margin-top:20px">
+    <h3>댓글 모음</h4>
+
+    {% for comment in member.cmt_set.all %}
+      <hr>
+      <p class="text-success"><strong>댓글:</strong> </p>
+      <p>{{comment.comment}}</p>
+      <p class="text-muted"><strong>Date:</strong> {{comment.date}}</p>
+      <a href = "{{comment.link}}">{{comment.link}}</a>
+    {% endfor %}
+  </div>
+{% endblock %}
