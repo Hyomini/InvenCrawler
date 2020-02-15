@@ -1,13 +1,16 @@
-{% extends "base_generic.html" %}
+﻿{% extends "base_generic.html" %}
 
 {% block content %}
   <h1>Member List</h1>
+<form action='{% url 'members' %}' method='get'>
+    <label for="search_nick">Enter name: </label>
+    <input id="search_nick" type="text" name="search_nick" value="{{ search_nick }}">
+    <input type="submit" value="Search">
+</form>
   {% if member_list %}
-  <ul>
+  <ul class="list-group">
     {% for member in member_list %}
-      <li>
-        <a href="{{ member.get_absolute_url }}">{{ member.nickname_text }}</a>
-      </li>
+        <a href="{{ member.get_absolute_url }}" class="list-group-item list-group-item-light text-info">{{ member.nickname_text }}</a>
     {% endfor %}
   </ul>
   {% else %}
